@@ -10,15 +10,16 @@ interface GalleryImage {
 
 interface ImageGalleryProps {
   images: GalleryImage[];
+  isLoading?: boolean;
 }
 
-export function ImageGallery({ images }: ImageGalleryProps) {
+export function ImageGallery({ images, isLoading = false }: ImageGalleryProps) {
   if (!images || images.length === 0) {
     return <p>No hay imágenes en la galería.</p>;
   }
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 md:p-8">
+    <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 md:p-8 transition-opacity duration-300 ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
       {images.map((image) => (
         <div key={image._id} className="group relative block overflow-hidden rounded-lg shadow-lg">
           <Image

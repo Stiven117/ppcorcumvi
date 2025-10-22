@@ -1,7 +1,7 @@
 import Image from "next/image";
 import { client } from "@/lib/sanity";
-import { ImageGallery } from "@/components/ui/image-gallery";
-import { PaginationControls } from "@/components/ui/pagination-controls";
+import { GalleryWrapper } from "../components/ui/gallery-wrapper";
+import { Footer } from "../components/ui/footer";
 
 // Definimos el tipo de dato para una imagen de la galería
 interface GalleryImage {
@@ -15,15 +15,20 @@ interface GalleryImage {
 const IMAGES_PER_PAGE = 9;
 
 // Hacemos que el componente sea asíncrono y que acepte searchParams
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined };
+export default async function Home({ searchParams: searchParamsProp }: {
+  // Hacemos que coincida con el tipo incorrecto de .next/types/routes.d.ts
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
+  // "Resolvemos" la promesa para que TypeScript esté contento.
+  // En tiempo de ejecución, esto es instantáneo porque searchParams es un objeto.
+  const searchParams = await searchParamsProp;
   // 1. Obtenemos la página actual desde la URL, por defecto es la 1
   const pageParam = searchParams["page"];
-  const page = Array.isArray(pageParam) ? pageParam[0] : pageParam ?? "1";
-  const currentPage = Number(page);
+  const pageString = Array.isArray(pageParam) ? pageParam[0] : pageParam;
+
+  // Validamos que `page` sea un número entero y positivo. Si no, usamos 1.
+  const parsedPage = parseInt(pageString ?? "1", 10);
+  const currentPage = !isNaN(parsedPage) && parsedPage > 0 ? parsedPage : 1;
 
   // 2. Calculamos el rango de imágenes a pedir
   const start = (currentPage - 1) * IMAGES_PER_PAGE;
@@ -90,31 +95,12 @@ export default async function Home({
 
         {/* Gallery */}
         <h2 className="text-3xl font-bold text-center mb-8">Galería de Encuentros</h2>
-        <ImageGallery images={images} />
-
-        {/* Pagination Controls */}
-        <PaginationControls
-          currentPage={currentPage}
+        <GalleryWrapper
+          initialImages={images}
           totalPages={totalPages}
         />
       </div>
-
-      <footer className="w-full bg-slate-800 text-white p-8 mt-auto">
-        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
-          <div className="mb-4 md:mb-0">
-            <p className="font-bold">CORPORACIÓN CULTURAL MUNICIPAL DE VILLAVICENCIO</p>
-            <p className="text-sm text-slate-300">Dirección: Cra 45a No 8-16/50 La Esperanza</p>
-          </div>
-          <a
-            href="https://www.corcumvi.gov.co/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-4xl font-extrabold tracking-tighter"
-          >
-            CORCUMVI
-          </a>
-        </div>
-      </footer>
+      <Footer />
     </main>
   );
 }

@@ -9,5 +9,5 @@ export const client = createClient({
   projectId,
   dataset,
   apiVersion,
-  useCdn: true, // `false` si quieres datos frescos siempre
+  useCdn: false, // `false` si quieres datos frescos siempre
 })

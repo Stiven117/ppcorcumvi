@@ -1,103 +1,120 @@
 import Image from "next/image";
+import { client } from "@/lib/sanity";
+import { ImageGallery } from "@/components/ui/image-gallery";
+import { PaginationControls } from "@/components/ui/pagination-controls";
 
-export default function Home() {
+// Definimos el tipo de dato para una imagen de la galería
+interface GalleryImage {
+  _id: string;
+  title: string;
+  imageUrl: string;
+  meetingDate: string;
+}
+
+// Definimos cuantas imágenes mostrar por página
+const IMAGES_PER_PAGE = 9;
+
+// Hacemos que el componente sea asíncrono y que acepte searchParams
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | string[] | undefined };
+}) {
+  // 1. Obtenemos la página actual desde la URL, por defecto es la 1
+  const pageParam = searchParams["page"];
+  const page = Array.isArray(pageParam) ? pageParam[0] : pageParam ?? "1";
+  const currentPage = Number(page);
+
+  // 2. Calculamos el rango de imágenes a pedir
+  const start = (currentPage - 1) * IMAGES_PER_PAGE;
+  const end = start + IMAGES_PER_PAGE;
+
+  // 3. Definimos la consulta para las imágenes de la página y para el conteo total
+  const imagesQuery = `*[_type == "galleryImage"] | order(meetingDate desc) [${start}...${end}] {
+    _id,
+    title,
+    meetingDate,
+    "imageUrl": image.asset->url
+  }`;
+  const totalImagesQuery = `count(*[_type == "galleryImage"])`;
+
+  // 4. Ejecutamos ambas consultas en paralelo para mayor eficiencia
+  const [images, totalImages] = await Promise.all([
+    client.fetch<GalleryImage[]>(imagesQuery),
+    client.fetch<number>(totalImagesQuery),
+  ]);
+
+  // 5. Calculamos el número total de páginas
+  const totalPages = Math.ceil(totalImages / IMAGES_PER_PAGE);
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
+    <main className="flex min-h-screen flex-col items-center bg-gray-50 text-gray-800">
+      {/* Banner Section */}
+      <div className="w-full h-64 relative">
         <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+          src="/img/banner.jpg"
+          alt="Banner"
+          layout="fill"
+          objectFit="cover"
         />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+        <div className="absolute inset-0 flex items-center justify-center bg-black/60">
+          <h1 className="text-5xl font-bold text-white text-center drop-shadow-md">
+            Política Pública Villavicencio 2025
+          </h1>
+        </div>
+      </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
+      {/* Content Section */}
+      <div className="container mx-auto flex-grow p-8 md:p-12">
+        {/* Survey Button */}
+        <div
+          className="my-8 md:my-12 rounded-lg relative overflow-hidden text-center"
+          style={{
+            backgroundImage: "url(/img/encuesta.png)",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <div className="absolute inset-0 bg-black/15" />
+          <div className="relative py-20 md:py-32">
+            <a
+              href="https://forms.gle/5doZe5HjEKmA5C4S9"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block bg-[#0470bd] text-white font-bold text-xl rounded-lg px-10 py-5 shadow-lg hover:bg-[#035da7] transition-transform duration-300 ease-in-out hover:scale-105"
+            >
+              Diligenciar Encuesta
+            </a>
+          </div>
+        </div>
+
+        {/* Gallery */}
+        <h2 className="text-3xl font-bold text-center mb-8">Galería de Encuentros</h2>
+        <ImageGallery images={images} />
+
+        {/* Pagination Controls */}
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+        />
+      </div>
+
+      <footer className="w-full bg-slate-800 text-white p-8 mt-auto">
+        <div className="container mx-auto flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+          <div className="mb-4 md:mb-0">
+            <p className="font-bold">CORPORACIÓN CULTURAL MUNICIPAL DE VILLAVICENCIO</p>
+            <p className="text-sm text-slate-300">Dirección: Cra 45a No 8-16/50 La Esperanza</p>
+          </div>
           <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
+            href="https://www.corcumvi.gov.co/"
             target="_blank"
             rel="noopener noreferrer"
+            className="text-4xl font-extrabold tracking-tighter"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
+            CORCUMVI
           </a>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
       </footer>
-    </div>
+    </main>
   );
 }

@@ -9,6 +9,7 @@ interface GalleryImage {
   title: string;
   imageUrl: string;
   meetingDate: string;
+  description?: string;
 }
 
 // Definimos cuantas imágenes mostrar por página
@@ -39,7 +40,8 @@ export default async function Home({ searchParams: searchParamsProp }: {
     _id,
     title,
     meetingDate,
-    "imageUrl": image.asset->url
+    "imageUrl": image.asset->url,
+    description
   }`;
   const totalImagesQuery = `count(*[_type == "galleryImage"])`;
 
@@ -62,26 +64,21 @@ export default async function Home({ searchParams: searchParamsProp }: {
           layout="fill"
           objectFit="cover"
         />
-        <div className="absolute inset-0 flex items-center justify-center bg-black/60">
-          <h1 className="text-5xl font-bold text-white text-center drop-shadow-md">
-            Política Pública Villavicencio 2025
-          </h1>
-        </div>
       </div>
 
       {/* Content Section */}
-      <div className="container mx-auto flex-grow p-8 md:p-12">
+      <div className="container mx-auto grow p-8 md:p-12">
         {/* Survey Button */}
         <div
-          className="my-8 md:my-12 rounded-lg relative overflow-hidden text-center"
+          className="my-8 md:my-12 rounded-lg relative overflow-hidden text-right"
           style={{
             backgroundImage: "url(/img/encuesta.png)",
             backgroundSize: "cover",
             backgroundPosition: "center",
           }}
         >
-          <div className="absolute inset-0 bg-black/15" />
-          <div className="relative py-20 md:py-32">
+          <div className="absolute inset-0 bg-black/5" />
+          <div className="relative py-20 md:py-32 pr-8 md:pr-45">
             <a
               href="https://forms.gle/5doZe5HjEKmA5C4S9"
               target="_blank"
@@ -94,7 +91,7 @@ export default async function Home({ searchParams: searchParamsProp }: {
         </div>
 
         {/* Gallery */}
-        <h2 className="text-3xl font-bold text-center mb-8">Galería de Encuentros</h2>
+        <h2 className="text-3xl font-bold text-center mb-8">Galería Mesas de Trabajo</h2>
         <GalleryWrapper
           initialImages={images}
           totalPages={totalPages}

@@ -5,6 +5,7 @@ import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { client } from '@/lib/sanity';
 import { ImageGallery } from './image-gallery';
 import { PaginationControls } from './pagination-controls';
+import { ImageModal } from './image-modal';
 
 // Definimos el tipo de dato para una imagen de la galería
 interface GalleryImage {
@@ -12,6 +13,7 @@ interface GalleryImage {
   title: string;
   imageUrl: string;
   meetingDate: string;
+  description?: string;
 }
 
 const IMAGES_PER_PAGE = 9;
@@ -32,6 +34,7 @@ export function GalleryWrapper({ initialImages, totalPages }: GalleryWrapperProp
   const [images, setImages] = useState(initialImages);
   const [currentPage, setCurrentPage] = useState(initialPage);
   const [isPending, startTransition] = useTransition();
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
 
   useEffect(() => {
     // Si estamos en la página inicial que se cargó desde el servidor, no hacemos nada.
@@ -50,7 +53,8 @@ export function GalleryWrapper({ initialImages, totalPages }: GalleryWrapperProp
         _id,
         title,
         meetingDate,
-        "imageUrl": image.asset->url
+        "imageUrl": image.asset->url,
+        description
       }`;
       
       const newImages = await client.fetch<GalleryImage[]>(query);
@@ -68,13 +72,19 @@ export function GalleryWrapper({ initialImages, totalPages }: GalleryWrapperProp
 
   return (
     <>
-      <ImageGallery images={images} isLoading={isPending} />
+      <ImageGallery images={images} isLoading={isPending} onImageClick={setSelectedImage} />
       <PaginationControls
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={handlePageChange}
         isDisabled={isPending}
       />
+      {selectedImage && (
+        <ImageModal 
+          image={selectedImage} 
+          onClose={() => setSelectedImage(null)} 
+        />
+      )}
     </>
   );
 }

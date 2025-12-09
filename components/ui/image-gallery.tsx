@@ -6,14 +6,16 @@ interface GalleryImage {
   title: string;
   imageUrl: string;
   meetingDate: string;
+  description?: string;
 }
 
 interface ImageGalleryProps {
   images: GalleryImage[];
   isLoading?: boolean;
+  onImageClick: (image: GalleryImage) => void;
 }
 
-export function ImageGallery({ images, isLoading = false }: ImageGalleryProps) {
+export function ImageGallery({ images, isLoading = false, onImageClick }: ImageGalleryProps) {
   if (!images || images.length === 0) {
     return <p>No hay imágenes en la galería.</p>;
   }
@@ -21,7 +23,7 @@ export function ImageGallery({ images, isLoading = false }: ImageGalleryProps) {
   return (
     <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 p-4 md:p-8 transition-opacity duration-300 ${isLoading ? 'opacity-50' : 'opacity-100'}`}>
       {images.map((image) => (
-        <div key={image._id} className="group relative block overflow-hidden rounded-lg shadow-lg">
+        <div key={image._id} className="group relative block overflow-hidden rounded-lg shadow-lg cursor-pointer" onClick={() => onImageClick(image)}>
           <Image
             src={image.imageUrl}
             alt={image.title}

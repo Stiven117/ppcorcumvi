@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Papa from 'papaparse';
-import { 
+import {
   Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis
 } from 'recharts';
 import { Footer } from '@/components/ui/footer';
@@ -12,7 +12,7 @@ import Link from 'next/link';
 interface ChartData {
   name: string;
   value: number;
-  [key: string]: any;
+  [key: string]: string | number;
 }
 
 // Define a type for a single row of the CSV data.
@@ -146,7 +146,7 @@ export default function ResultsPage() {
     fetchData();
   }, []);
 
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent, name }: any) => {
+  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);

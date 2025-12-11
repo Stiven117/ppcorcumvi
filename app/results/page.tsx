@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import Papa from 'papaparse';
-import {
-  Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis
-} from 'recharts';
+import { Bar, BarChart, CartesianGrid, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+// Import the specific type for the Pie label props
+import { PieLabelRenderProps } from 'recharts';
 import { Footer } from '@/components/ui/footer';
 import Link from 'next/link';
 
@@ -146,7 +146,10 @@ export default function ResultsPage() {
     fetchData();
   }, []);
 
-  const renderCustomizedLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, percent }: any) => {
+  const renderCustomizedLabel = (props: PieLabelRenderProps) => {
+    const { cx, cy, midAngle, innerRadius, outerRadius, percent } = props;
+    // Guard to prevent rendering if essential props are missing
+    if (percent === undefined || cx === undefined || cy === undefined || midAngle === undefined || innerRadius === undefined || outerRadius === undefined) return null;
     const RADIAN = Math.PI / 180;
     const radius = innerRadius + (outerRadius - innerRadius) * 0.5;
     const x = cx + radius * Math.cos(-midAngle * RADIAN);

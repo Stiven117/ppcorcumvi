@@ -35,7 +35,7 @@ export default async function Home({ searchParams: searchParamsProp }: {
   const start = (currentPage - 1) * IMAGES_PER_PAGE;
   const end = start + IMAGES_PER_PAGE;
 
-  // 3. Definimos la consulta para las imágenes de la página y para el conteo total
+  // 3. Definicion para consulta de las imágenes de la página y para el conteo total
   const imagesQuery = `*[_type == "galleryImage"] | order(meetingDate desc) [${start}...${end}] {
     _id,
     title,
@@ -80,12 +80,10 @@ export default async function Home({ searchParams: searchParamsProp }: {
           <div className="absolute inset-0 bg-black/5" />
           <div className="relative py-20 md:py-32 pr-8 md:pr-45">
             <a
-              href="https://forms.gle/5doZe5HjEKmA5C4S9"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/results"
               className="inline-block bg-[#0470bd] text-white font-bold text-xl rounded-lg px-10 py-5 shadow-lg hover:bg-[#035da7] transition-transform duration-300 ease-in-out hover:scale-105"
             >
-              Diligenciar Encuesta
+              Consultar resultados de la encuesta
             </a>
           </div>
         </div>
